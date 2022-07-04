@@ -15,17 +15,26 @@ export const ACTION_TYPES = {
 const initialState = {
   currentOperand: null, 
   previousOperand: null,
-  operation: null
+  operation: null,
+  overwrite: false
 }
 
 
 const reducer = (state, action) => {
     const {type, payload} = action;
-    const {currentOperand, previousOperand, operation} = state;
+    const {currentOperand, previousOperand, operation, overwrite} = state;
 
 
     switch(type){
         case ACTION_TYPES.ADD_DIGIT:
+
+          if(overwrite){
+            return {
+              ...state,
+              currentOperand: payload.digit,
+              overwrite: false
+            }
+          }
           
           if(payload.digit === '0' && currentOperand === '0'){
             return state;
@@ -39,7 +48,7 @@ const reducer = (state, action) => {
           }
 
         case ACTION_TYPES.RESET_CALCULATOR:
-          return {}
+          return {initialState};
 
         case ACTION_TYPES.CHOOSE_OPERATION: 
           if(currentOperand == null && previousOperand == null){
@@ -67,32 +76,41 @@ const reducer = (state, action) => {
 
           return {
             ...state,
-            previousOperand: evalulate(state).toString(),
+            previousOperand: evalulate(state),
             operation: payload.operation,
             currentOperand: null
             
           }
 
         case ACTION_TYPES.CALCULATE_TOTAL: 
-        
-          if(previousOperand === null || currentOperand === null || operation === null ){
-            return state;
+
+          if(previousOperand === null && operation === null && currentOperand === null){
+            console.log('nothing');
+            return {};
+          }
+
+          if(previousOperand === null || operation === null ){
+            return {initialState};
           }
 
           if(currentOperand === null){
+            console.log('no current Op');
             return{
             ...state,
             currentOperand: evalulateEqualSign(state).toString(),
             operation: null,
-            previousOperand: null
+            previousOperand: null,
+            overwrite: true
             }
           }
 
+          console.log('last return');
           return{
             ...state,
-            currentOperand: evalulate(state).toString(),
+            currentOperand: evalulate(state),
             operation: null,
-            previousOperand: null
+            previousOperand: null,
+            overwrite: true
           }  
 
         default:
@@ -106,35 +124,33 @@ const evalulate = (state) => {
     const prev = parseFloat(previousOperand);
     const curr = parseFloat(currentOperand);
     if(operation === '+'){
-      return prev + curr;
+      return (prev + curr).toString();
     } else if(operation === '÷'){
-      return prev / curr;
+      return (prev / curr).toString();
     } else if(operation === '-'){
-      return prev - curr;
+      return (prev - curr).toString();
     } else if(operation === '*'){
-      return prev * curr;
+      return (prev * curr).toString();
     } 
-    return state;
+    return null;
 }
 const evalulateEqualSign = (state) => {
     const {currentOperand, previousOperand, operation} = state;
     const prev = parseFloat(previousOperand);
     const curr = parseFloat(currentOperand);
 
-    if(operation === null || currentOperand === null || previousOperand === null){
-      return state
-    }
     if(currentOperand === null){
+
       if(operation === '+'){
-        return prev + prev;
+        return (prev + prev).toString();
       } else if(operation === '÷'){
-        return prev / prev;
+        return (prev + prev).toString();
       } else if(operation === '-'){
-        return prev - prev;
+        return (prev + prev).toString();
       } else if(operation === '*'){
-        return prev * prev;
+        return (prev + prev).toString();
       } 
-      return state;
+      return null;
     }
 }
 
