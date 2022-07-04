@@ -14,7 +14,8 @@ export const ACTION_TYPES = {
 
 const initialState = {
   currentOperand: null, 
-  previousOperand: null
+  previousOperand: null,
+  operation: null
 }
 
 
@@ -42,7 +43,11 @@ const reducer = (state, action) => {
 
         case ACTION_TYPES.CHOOSE_OPERATION: 
           if(currentOperand == null && previousOperand == null){
-            return state
+            return {
+            operation: null,
+            previousOperand: null,
+            currentOperand: null
+            }
           }
 
           if(previousOperand == null){
@@ -54,21 +59,85 @@ const reducer = (state, action) => {
           }
 
           if(currentOperand == null){
+            return {
+              ...state,
+              operation: payload.operation,
+            }
+          }
+
+          return {
+            ...state,
+            previousOperand: evalulate(state).toString(),
+            operation: payload.operation,
+            currentOperand: null
+            
+          }
+
+        case ACTION_TYPES.CALCULATE_TOTAL: 
+        
+          if(previousOperand === null || currentOperand === null || operation === null ){
             return state;
           }
 
-
-        
-          return {
-            previousOperand: `${'test'}${payload.operation}`,
-            currentOperand: null
+          if(currentOperand === null){
+            return{
+            ...state,
+            currentOperand: evalulateEqualSign(state).toString(),
+            operation: null,
+            previousOperand: null
+            }
           }
+
+          return{
+            ...state,
+            currentOperand: evalulate(state).toString(),
+            operation: null,
+            previousOperand: null
+          }  
 
         default:
           return state
     } 
 
 }
+
+const evalulate = (state) => {
+    const {currentOperand, previousOperand, operation} = state;
+    const prev = parseFloat(previousOperand);
+    const curr = parseFloat(currentOperand);
+    if(operation === '+'){
+      return prev + curr;
+    } else if(operation === '÷'){
+      return prev / curr;
+    } else if(operation === '-'){
+      return prev - curr;
+    } else if(operation === '*'){
+      return prev * curr;
+    } 
+    return state;
+}
+const evalulateEqualSign = (state) => {
+    const {currentOperand, previousOperand, operation} = state;
+    const prev = parseFloat(previousOperand);
+    const curr = parseFloat(currentOperand);
+
+    if(operation === null || currentOperand === null || previousOperand === null){
+      return state
+    }
+    if(currentOperand === null){
+      if(operation === '+'){
+        return prev + prev;
+      } else if(operation === '÷'){
+        return prev / prev;
+      } else if(operation === '-'){
+        return prev - prev;
+      } else if(operation === '*'){
+        return prev * prev;
+      } 
+      return state;
+    }
+}
+
 
 
 
@@ -101,7 +170,7 @@ function App() {
       <OperationButton operation={"-"} dispatch={dispatch} />
       <DigitButton digit={"."} dispatch={dispatch} />
       <DigitButton digit={"0"} dispatch={dispatch}/>
-      <button className='span-two'>=</button>
+      <button onClick={() => dispatch({type: ACTION_TYPES.CALCULATE_TOTAL})} className='span-two'>=</button>
     </div>
   );
 }
