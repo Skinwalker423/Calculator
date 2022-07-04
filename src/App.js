@@ -1,11 +1,10 @@
 import { useReducer } from 'react';
-import { act } from 'react-dom/test-utils';
+import DigitButton from './component/DigitButton';
+import OperationButton from './component/OperationButton';
 
 import './styles.css';
 
-const calculatorInputs = ['AC','DEL', '÷', 1,2,3,'*',4,5,6,'+',7,8,9,'-','.',0,'=']
-
-const ACTION_TYPES = {
+export const ACTION_TYPES = {
   ADD_DIGIT: 'ADD_DIGIT',
   DELETE_DIGIT: 'DELETE_DIGIT',
   RESET_CALCULATOR: 'RESET_CALCULATOR',
@@ -13,12 +12,57 @@ const ACTION_TYPES = {
   CHOOSE_OPERATION: 'CHOOSE_OPERATION'
 }
 
+const initialState = {
+  currentOperand: null, 
+  previousOperand: null
+}
+
+
 const reducer = (state, action) => {
     const {type, payload} = action;
+    const {currentOperand, previousOperand, operation} = state;
+
 
     switch(type){
         case ACTION_TYPES.ADD_DIGIT:
-          return {...state, currentOperand: `${currentOperand || ''}${payload.digit}`}
+          
+          if(payload.digit === '0' && currentOperand === '0'){
+            return state;
+          }
+          if(payload.digit === '.' && currentOperand.includes('.')){
+            return state;
+          }
+          return {
+            ...state, 
+            currentOperand:`${currentOperand || ''}${payload.digit}`
+          }
+
+        case ACTION_TYPES.RESET_CALCULATOR:
+          return {}
+
+        case ACTION_TYPES.CHOOSE_OPERATION: 
+          if(currentOperand == null && previousOperand == null){
+            return state
+          }
+
+          if(previousOperand == null){
+            return {
+            operation: payload.operation,
+            previousOperand: currentOperand,
+            currentOperand: null
+            }
+          }
+
+          if(currentOperand == null){
+            return state;
+          }
+
+
+        
+          return {
+            previousOperand: `${'test'}${payload.operation}`,
+            currentOperand: null
+          }
 
         default:
           return state
@@ -26,10 +70,13 @@ const reducer = (state, action) => {
 
 }
 
+
+
 function App() {
 
-  const [state, dispatch] = useReducer(reducer, {});
-  const {currentOperand, previousOperand, operation} = state;
+  const [{currentOperand, previousOperand, operation}, dispatch] = useReducer(reducer, initialState);
+
+  
 
   return (
     <div className="calculator-grid">
@@ -37,12 +84,24 @@ function App() {
         <div className="previous-operand">{previousOperand} {operation}</div>
         <div className="current-operand">{currentOperand}</div>
       </div>
-      
-      {calculatorInputs.map((input) => {
-        return (
-          <button className={input === 'AC' || input === '=' ? 'span-two' : ''}>{input}</button>
-        )
-      })}
+      <button onClick={() => dispatch({type: ACTION_TYPES.RESET_CALCULATOR})} className='span-two'>AC</button>
+      <button>DEL</button>
+      <OperationButton operation={"÷"} dispatch={dispatch} />
+      <DigitButton digit={"1"} dispatch={dispatch}/>
+      <DigitButton digit={"2"} dispatch={dispatch}/>
+      <DigitButton digit={"3"} dispatch={dispatch}/>
+      <OperationButton operation={"*"} dispatch={dispatch} />
+      <DigitButton digit={"4"} dispatch={dispatch}/>
+      <DigitButton digit={"5"} dispatch={dispatch}/>
+      <DigitButton digit={"6"} dispatch={dispatch}/>
+      <OperationButton operation={"+"} dispatch={dispatch} />
+      <DigitButton digit={"7"} dispatch={dispatch}/>
+      <DigitButton digit={"8"} dispatch={dispatch}/>
+      <DigitButton digit={"9"} dispatch={dispatch}/>
+      <OperationButton operation={"-"} dispatch={dispatch} />
+      <DigitButton digit={"."} dispatch={dispatch} />
+      <DigitButton digit={"0"} dispatch={dispatch}/>
+      <button className='span-two'>=</button>
     </div>
   );
 }
