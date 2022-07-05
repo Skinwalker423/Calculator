@@ -20,6 +20,10 @@ const initialState = {
 }
 
 
+
+
+
+
 const reducer = (state, action) => {
     const {type, payload} = action;
     const {currentOperand, previousOperand, operation, overwrite} = state;
@@ -86,7 +90,7 @@ const reducer = (state, action) => {
 
           if(previousOperand === null && operation === null && currentOperand === null){
             console.log('nothing');
-            return {};
+            return {initialState};
           }
 
           if(previousOperand === null || operation === null ){
@@ -112,6 +116,34 @@ const reducer = (state, action) => {
             previousOperand: null,
             overwrite: true
           }  
+        
+        case ACTION_TYPES.DELETE_DIGIT:
+
+          if(currentOperand === null && previousOperand === null){
+            console.log('empty curr and prev');
+            return {initialState}
+          }
+
+          if(overwrite){
+            return {
+              ...state,
+              currentOperand: null,
+              overwrite: false
+            }
+          }
+
+          if(currentOperand === null || currentOperand.length === 1){
+            console.log('length portion')
+            return {
+              ...state,
+              currentOperand: null,
+            }
+          }
+
+          return {
+            ...state, 
+            currentOperand: currentOperand.slice(0, -1)
+          }
 
         default:
           return state
@@ -154,6 +186,22 @@ const evalulateEqualSign = (state) => {
     }
 }
 
+const INTEGER_FORMATTER = new Intl.NumberFormat('en-US',{
+  maximumFractionDigits: 0
+})
+
+const formatOperand = (operand) => {
+    if(operand == null){
+      return;
+    }
+    const [int, dec] = operand.split(".");
+    const formattedInt = INTEGER_FORMATTER.format(int)
+    if(dec == null){
+      return formattedInt;
+    }
+    return `${formattedInt}.${dec}`
+}
+
 
 
 
@@ -161,16 +209,21 @@ function App() {
 
   const [{currentOperand, previousOperand, operation}, dispatch] = useReducer(reducer, initialState);
 
-  
+  const deleteDigitHandler = () => {
+  if(currentOperand != null){
+    console.log('dispatching delete')
+    dispatch({type: ACTION_TYPES.DELETE_DIGIT})
+  }
+}
 
   return (
     <div className="calculator-grid">
       <div className="output">
-        <div className="previous-operand">{previousOperand} {operation}</div>
-        <div className="current-operand">{currentOperand}</div>
+        <div className="previous-operand">{formatOperand(previousOperand)} {operation}</div>
+        <div className="current-operand">{formatOperand(currentOperand)}</div>
       </div>
       <button onClick={() => dispatch({type: ACTION_TYPES.RESET_CALCULATOR})} className='span-two'>AC</button>
-      <button>DEL</button>
+      <button onClick={deleteDigitHandler}>DEL</button>
       <OperationButton operation={"÷"} dispatch={dispatch} />
       <DigitButton digit={"1"} dispatch={dispatch}/>
       <DigitButton digit={"2"} dispatch={dispatch}/>
