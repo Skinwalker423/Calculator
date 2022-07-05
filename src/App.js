@@ -169,7 +169,6 @@ const evalulate = (state) => {
 const evalulateEqualSign = (state) => {
     const {currentOperand, previousOperand, operation} = state;
     const prev = parseFloat(previousOperand);
-    const curr = parseFloat(currentOperand);
 
     if(currentOperand === null){
 
