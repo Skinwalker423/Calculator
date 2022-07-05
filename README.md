@@ -2,6 +2,11 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+Deployed by Netlify: https://calcu-early.netlify.app/
+
+![calcu-early](https://user-images.githubusercontent.com/85347852/177430688-bcf789b8-bf4e-4e9e-8166-fa3c1c3009c4.PNG)
+
+
 ## Available Scripts
 
 In the project directory, you can run:
